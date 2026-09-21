@@ -6,6 +6,7 @@ const exitDialog = document.querySelector('#exitDialog');
 const lab = document.querySelector('#lab');
 const debrief = document.querySelector('#debrief');
 let state = {mode:'simulation',moment:0,startedAt:0,promptUsed:false,records:[],path:'standard',muted:false,reduced:false};
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 const moments = [
   {
@@ -80,6 +81,8 @@ function renderMoment(){
         <div class="model-note">Prototype adaptive logic - not trained ML</div>
         <h3>Choose your next action</h3>
         <div class="action-list">${item.actions.map(a=>`<button class="action" data-action="${a.id}" type="button"><span>${a.label}</span><b>Choose</b></button>`).join('')}</div>
+        <button class="voice" id="voiceButton" type="button" ${SpeechRecognition?'':'disabled'}>${SpeechRecognition?'Use voice response':'Voice unavailable - use buttons'}</button>
+        <p class="voice-status" id="voiceStatus">Voice is matched locally to the visible choices; audio is not stored.</p>
         <button class="hint" id="hintButton" type="button">Show one procedural cue</button>
         <div class="support hidden" id="support">${item.support}</div>
       </aside>
@@ -88,10 +91,29 @@ function renderMoment(){
   const timer=lab.querySelector('#timer');
   const tick=setInterval(()=>{if(!document.body.contains(timer)){clearInterval(tick);return}const s=Math.floor((performance.now()-state.startedAt)/1000);timer.textContent=`00:${String(s).padStart(2,'0')}`},250);
   lab.querySelectorAll('.action').forEach(button=>button.addEventListener('click',()=>chooseAction(button.dataset.action,'button')));
+  if(SpeechRecognition) lab.querySelector('#voiceButton').addEventListener('click',listenForAction);
   lab.querySelector('#hintButton').addEventListener('click',()=>{state.promptUsed=true;lab.querySelector('#support').classList.remove('hidden');lab.querySelector('#hintButton').disabled=true});
   lab.querySelector('#motionToggle').addEventListener('click',()=>{state.reduced=!state.reduced;renderMoment()});
   lab.querySelector('#muteToggle').addEventListener('click',()=>{state.muted=!state.muted;lab.querySelector('#muteToggle').textContent=state.muted?'Sound muted':'Mute sound'});
   lab.querySelector('.action').focus();
+}
+
+function listenForAction(){
+  const button=lab.querySelector('#voiceButton');
+  const status=lab.querySelector('#voiceStatus');
+  const recognition=new SpeechRecognition();
+  recognition.lang='en-US'; recognition.interimResults=false; recognition.maxAlternatives=1;
+  button.disabled=true; button.textContent='Listening…'; status.textContent='Say one visible action. Nothing is uploaded by this prototype.';
+  recognition.onresult=event=>{
+    const words=event.results[0][0].transcript.toLowerCase();
+    const item=moments[state.moment];
+    const aliases={protect:['drop','cover','hold','protect'],exit:['exit','run'],observe:['wait','others'],alternate:['alternate','hazard','other route'],usual:['cabinet','usual','climb'],freeze:['stay','someone','lead'],report:['report','brigade','location'],reenter:['inside','search','back'],broadcast:['post','warning','everyone']};
+    const match=item.actions.find(a=>(aliases[a.id]||[]).some(word=>words.includes(word)));
+    if(match){status.textContent=`Matched: ${match.label}`;setTimeout(()=>chooseAction(match.id,'voice'),450)}else{button.disabled=false;button.textContent='Try voice again';status.textContent='I could not match that response. Choose a button or try one visible phrase.'}
+  };
+  recognition.onerror=()=>{button.disabled=false;button.textContent='Try voice again';status.textContent='Voice could not start. The buttons are an equal input path.'};
+  recognition.onend=()=>{if(document.body.contains(button)&&button.disabled){button.textContent='Processing voice…'}};
+  recognition.start();
 }
 
 function chooseAction(actionId,inputMode){
@@ -114,9 +136,13 @@ function renderTransition(){
 }
 
 function finishRehearsal(){
+  const independent=state.records.filter(r=>!r.promptUsed&&r.signal>=1);
+  const needs=state.records.filter(r=>r.signal<1);
+  const strength=independent[0]?.evidence || 'You completed the rehearsal and created a reviewable decision record.';
+  const priorities=(needs.length?needs:state.records.slice(-2)).slice(0,2).map(r=>r.evidence);
   lab.classList.add('hidden');
   debrief.classList.remove('hidden');
-  debrief.innerHTML=`<p class="eyebrow">Private behavioral debrief</p><h2>Evidence, not a readiness score.</h2><p>Your three decisions were recorded on this device. A complete session is attendance only; it is not competence, compliance, survival proof, or evidence that this fictional building is safe.</p><div class="evidence-table">${state.records.map((r,i)=>`<article><span>0${i+1}</span><div><b>${r.moment}</b><p>${r.evidence}</p></div><dl><div><dt>Time</dt><dd>${r.elapsed}s</dd></div><div><dt>Prompt</dt><dd>${r.promptUsed?'Used':'Not used'}</dd></div><div><dt>Input</dt><dd>${r.inputMode}</dd></div></dl></article>`).join('')}</div><div class="uncertainty"><b>What remains unverified</b><p>This prototype cannot show whether behavior transfers to a real earthquake. Compare the same rubric in a separate physical drill two to four weeks later before claiming improvement.</p></div><div class="control-row"><button class="secondary" id="deleteRecord" type="button">Delete private record</button><button class="secondary" id="restart" type="button">Practice again</button><button class="primary" id="printDebrief" type="button">Print / save debrief</button></div>`;
+  debrief.innerHTML=`<p class="eyebrow">Private behavioral debrief</p><h2>Evidence, not a readiness score.</h2><p>Your three decisions were recorded on this device. A complete session is attendance only; it is not competence, compliance, survival proof, or evidence that this fictional building is safe.</p><div class="reflection-grid"><article><span>Observed strength</span><b>${strength}</b></article><article><span>Practice next</span><ul>${priorities.map(p=>`<li>${p}</li>`).join('')}</ul></article></div><div class="evidence-table">${state.records.map((r,i)=>`<article><span>0${i+1}</span><div><b>${r.moment}</b><p>${r.evidence}</p></div><dl><div><dt>Time</dt><dd>${r.elapsed}s</dd></div><div><dt>Prompt</dt><dd>${r.promptUsed?'Used':'Not used'}</dd></div><div><dt>Input</dt><dd>${r.inputMode}</dd></div></dl></article>`).join('')}</div><div class="uncertainty"><b>What remains unverified</b><p>This prototype cannot show whether behavior transfers to a real earthquake. Compare the same rubric in a separate physical drill two to four weeks later before claiming improvement.</p></div><div class="control-row"><button class="secondary" id="deleteRecord" type="button">Delete private record</button><button class="secondary" id="restart" type="button">Practice again</button><button class="primary" id="printDebrief" type="button">Print / save debrief</button></div>`;
   debrief.querySelector('#deleteRecord').addEventListener('click',()=>{sessionStorage.removeItem('rehearsalLab');debrief.querySelector('#deleteRecord').textContent='Record deleted';debrief.querySelector('#deleteRecord').disabled=true});
   debrief.querySelector('#restart').addEventListener('click',()=>location.reload());
   debrief.querySelector('#printDebrief').addEventListener('click',()=>print());
