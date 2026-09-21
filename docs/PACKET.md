@@ -19,7 +19,7 @@ Before the module closes, one consenting adult can complete three short, fiction
 
 ## Image-generated mockup
 
-![Image-generated Rehearsal Lab interface mockup](assets/rehearsal-lab-mockup.png)
+![Image-generated Rehearsal Lab interface mockup](assets/rehearsal-lab-mockup.jpg)
 
 The image above was generated before product code. It establishes the interface hierarchy: simulated environment, time pressure, decision options, optional voice input, visible exit, and a behavioral-evidence record.
 

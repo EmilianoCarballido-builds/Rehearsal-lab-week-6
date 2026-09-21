@@ -1,7 +1,83 @@
-Warning: truncated output (original token count: 1276)
-Total output lines: 83
-
 <!doctype html>
-<htm…1266 tokens truncated…pt>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A private, adaptive earthquake rehearsal prototype that measures decisions, actions, and timing without certifying preparedness.">
+  <meta name="theme-color" content="#091019">
+  <title>Rehearsal Lab</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23091019'/%3E%3Cpath d='M8 35h10l5-15 8 28 7-22 5 9h13' fill='none' stroke='%235be3ee' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Rehearsal Lab home"><span>REHEARSAL</span> LAB</a>
+    <span class="fiction-label">SIMULATION - FICTIONAL SCENARIO</span>
+    <button class="quiet-button" id="globalExit" type="button">Leave rehearsal</button>
+  </header>
+
+  <main>
+    <section class="gate" id="gate" aria-labelledby="gateTitle">
+      <div class="gate-copy">
+        <p class="eyebrow">Private readiness check</p>
+        <h1 id="gateTitle">Practice a changed cue.<br><span>Keep the evidence private.</span></h1>
+        <p class="lede">This fictional rehearsal observes choices inside software. It does not certify survival, competence, legal compliance, or building safety.</p>
+        <div class="notice" role="note">
+          <strong>You stay in control.</strong>
+          <span>No real tragedy is recreated. No face, emotion, biometric, or audio recording is stored. You may leave at any time.</span>
+        </div>
+      </div>
+
+      <form class="gate-card" id="gateForm">
+        <div class="step-label"><span>01</span> Safeguard check</div>
+        <fieldset>
+          <legend>Could earthquake or collapse imagery be distressing for you today?</legend>
+          <label class="choice"><input type="radio" name="trauma" value="no" required><span><b>No / not today</b><small>Continue with your chosen format.</small></span></label>
+          <label class="choice"><input type="radio" name="trauma" value="unsure"><span><b>Unsure</b><small>We recommend the lower-intensity, non-VR path.</small></span></label>
+          <label class="choice"><input type="radio" name="trauma" value="yes"><span><b>Yes</b><small>You can choose the non-VR path or leave with no penalty.</small></span></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Choose your rehearsal format</legend>
+          <div class="mode-grid">
+            <label class="mode-card"><input type="radio" name="mode" value="simulation" required><span><b>Video simulation</b><small>Motion, sound, and timed choices</small></span></label>
+            <label class="mode-card"><input type="radio" name="mode" value="non-vr"><span><b>Non-VR rehearsal</b><small>Same decisions in a calm text format</small></span></label>
+          </div>
+          <p class="equal-note">Both formats are equally legitimate and create the same evidence record.</p>
+        </fieldset>
+
+        <label class="consent"><input id="consent" type="checkbox" required><span>I understand this is a prototype rehearsal, not a test of my worth or a prediction of real-world survival.</span></label>
+        <button class="primary" id="previewButton" type="submit" disabled>Review intensity preview</button>
+      </form>
+    </section>
+
+    <section class="preview-panel hidden" id="previewPanel" aria-labelledby="previewTitle">
+      <p class="eyebrow">Intensity preview</p>
+      <h2 id="previewTitle">Before the rehearsal begins</h2>
+      <div class="preview-grid">
+        <div><span class="meter-label">Motion</span><div class="meter"><i style="width:45%"></i></div><small>Moderate, no flashing</small></div>
+        <div><span class="meter-label">Sound</span><div class="meter"><i style="width:55%"></i></div><small>Alarm and low rumble</small></div>
+        <div><span class="meter-label">Time pressure</span><div class="meter"><i style="width:65%"></i></div><small>Choices remain available</small></div>
+      </div>
+      <p>The setting and every person mentioned are invented. You can mute sound, reduce motion, or leave at any moment.</p>
+      <div class="control-row">
+        <button class="secondary" id="backToGate" type="button">Back</button>
+        <button class="primary" id="startRehearsal" type="button">Begin rehearsal</button>
+      </div>
+    </section>
+
+    <section class="lab hidden" id="lab" aria-live="polite"></section>
+    <section class="debrief hidden" id="debrief"></section>
+  </main>
+
+  <dialog id="exitDialog">
+    <h2>Leave the rehearsal?</h2>
+    <p>Your wellbeing matters more than finishing. Leaving is not recorded as failure.</p>
+    <div class="control-row">
+      <button class="secondary" id="stayButton" type="button">Stay</button>
+      <button class="primary" id="confirmExit" type="button">Leave safely</button>
+    </div>
+  </dialog>
+  <script src="app.js"></script>
 </body>
 </html>
