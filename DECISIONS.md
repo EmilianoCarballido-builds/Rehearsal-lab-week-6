@@ -16,3 +16,11 @@
 - Records remain in session storage and are deletable; no personal data leaves the device.
 - Mechanical pass completed with syntax, asset, secret, and state-flow checks.
 - Tomorrow's first move: deploy Version 1, test the motion-toggle measurement boundary, fix the worst observed issue, then run the Marisol persona pass.
+
+## 2026-09-21 - Session 3 close
+
+- Deploy 1 completed from the fifth commit.
+- Mechanical bug found: motion preference reset the decision timer and prompt evidence.
+- Fixed the toggle without re-rendering the moment and verified the code path.
+- Persona pass found that `adaptive branch` could feel like a hidden grade; the next moment now explains the support change in plain language and never shows a score.
+- Tomorrow's first move: create the submission PDFs, final transcript, and rehearse the 3 minute 30 second demo.

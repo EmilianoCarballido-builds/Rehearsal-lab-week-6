@@ -71,6 +71,7 @@ document.querySelector('#startRehearsal').addEventListener('click',()=>{
 function renderMoment(){
   const item=moments[state.moment];
   state.startedAt=performance.now(); state.promptUsed=false;
+  const systemSupport=state.moment>0&&state.path==='support';
   lab.innerHTML=`
     <div class="lab-head"><div><p class="eyebrow">Moment ${state.moment+1} of ${moments.length} · ${item.phase}</p><h2>${item.title}</h2></div><div class="timer" aria-label="Elapsed decision time"><small>Elapsed</small><strong id="timer">00:00</strong></div></div>
     <div class="simulation-grid ${state.mode==='non-vr'?'text-mode':''}">
@@ -79,12 +80,13 @@ function renderMoment(){
       </div>
       <aside class="decision-panel">
         <div class="model-note">Prototype adaptive logic - not trained ML</div>
+        ${state.moment>0?`<div class="branch-label ${systemSupport?'supportive':'challenge'}">${systemSupport?'More guidance added from the last decision':'Guidance reduced after the last decision'}</div>`:''}
         <h3>Choose your next action</h3>
         <div class="action-list">${item.actions.map(a=>`<button class="action" data-action="${a.id}" type="button"><span>${a.label}</span><b>Choose</b></button>`).join('')}</div>
         <button class="voice" id="voiceButton" type="button" ${SpeechRecognition?'':'disabled'}>${SpeechRecognition?'Use voice response':'Voice unavailable - use buttons'}</button>
         <p class="voice-status" id="voiceStatus">Voice is matched locally to the visible choices; audio is not stored.</p>
         <button class="hint" id="hintButton" type="button">Show one procedural cue</button>
-        <div class="support hidden" id="support">${item.support}</div>
+        <div class="support ${systemSupport?'':'hidden'}" id="support">${item.support}</div>
       </aside>
     </div>
     <div class="lab-footer"><button class="quiet-button" id="motionToggle" type="button">${state.reduced?'Standard motion':'Reduce motion'}</button><button class="quiet-button" id="muteToggle" type="button">${state.muted?'Sound muted':'Mute sound'}</button><span>Only decision, action, timing, and cue use are recorded on this device.</span></div>`;
@@ -93,7 +95,11 @@ function renderMoment(){
   lab.querySelectorAll('.action').forEach(button=>button.addEventListener('click',()=>chooseAction(button.dataset.action,'button')));
   if(SpeechRecognition) lab.querySelector('#voiceButton').addEventListener('click',listenForAction);
   lab.querySelector('#hintButton').addEventListener('click',()=>{state.promptUsed=true;lab.querySelector('#support').classList.remove('hidden');lab.querySelector('#hintButton').disabled=true});
-  lab.querySelector('#motionToggle').addEventListener('click',()=>{state.reduced=!state.reduced;renderMoment()});
+  lab.querySelector('#motionToggle').addEventListener('click',()=>{
+    state.reduced=!state.reduced;
+    lab.querySelector('.scene').classList.toggle('reduced',state.reduced);
+    lab.querySelector('#motionToggle').textContent=state.reduced?'Standard motion':'Reduce motion';
+  });
   lab.querySelector('#muteToggle').addEventListener('click',()=>{state.muted=!state.muted;lab.querySelector('#muteToggle').textContent=state.muted?'Sound muted':'Mute sound'});
   lab.querySelector('.action').focus();
 }
